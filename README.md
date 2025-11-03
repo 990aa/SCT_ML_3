@@ -124,7 +124,7 @@ The model shows balanced performance across both classes with minimal misclassif
 1. **Dataset Size**: Trained on a subset (2,000 images) of the full dataset
 2. **Binary Classification Only**: Cannot distinguish between breeds or other animals
 3. **Image Quality**: Performance may degrade with low-quality or heavily occluded images
-4. **Bias**: May inherit biases from the pre-training
+4. **Bias**: May inherit biases from the VGG16 pre-training (ImageNet)
 5. **Computational Cost**: Requires TensorFlow for feature extraction
 
 
