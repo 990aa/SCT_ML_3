@@ -1,0 +1,26 @@
+{
+  "model_type": "svm_vgg16",
+  "task": "image-classification",
+  "image_size": [
+    224,
+    224
+  ],
+  "num_classes": 2,
+  "class_names": [
+    "Cat",
+    "Dog"
+  ],
+  "feature_extractor": "VGG16",
+  "classifier": "SVM",
+  "kernel": "rbf",
+  "feature_dim": 512,
+  "pca_components": 512,
+  "framework": "scikit-learn + tensorflow",
+  "license": "mit",
+  "metrics": {
+    "accuracy": 0.98,
+    "precision": 0.95,
+    "recall": 0.95,
+    "f1_score": 0.95
+  }
+}

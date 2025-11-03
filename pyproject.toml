@@ -1,7 +1,10 @@
 [project]
 name = "cats-dogs-svm"
 version = "0.1.0"
-description = "Add your description here"
+description = "dogs vs cats classifier"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "dotenv>=0.9.9",
+    "huggingface-hub>=1.0.1",
+]

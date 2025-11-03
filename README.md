@@ -1,89 +1,176 @@
-# Dogs vs Cats Classification using SVM and VGG16
+---
+title: Dogs vs Cats Classifier (SVM + VGG16)
+emoji: 🐱🐶
+colorFrom: blue
+colorTo: purple
+sdk: gradio
+sdk_version: 4.44.0
+app_file: app.py
+pinned: false
+license: mit
+tags:
+  - image-classification
+  - computer-vision
+  - svm
+  - transfer-learning
+  - vgg16
+  - dogs
+  - cats
+  - sklearn
+datasets:
+  - kaggle/dogs-vs-cats
+metrics:
+  - accuracy
+  - precision
+  - recall
+  - f1
+---
 
-## Project Overview
-This project implements a binary image classification system to distinguish between cats and dogs using Support Vector Machines (SVM) combined with deep learning feature extraction via VGG16. The approach leverages transfer learning to extract meaningful features from images, which are then classified using a traditional machine learning algorithm.
+# 🐱🐶 Dogs vs Cats Classifier
 
-## Dataset
-- **Source**: Kaggle Dogs vs Cats Dataset
-- **Training Images**: 25,000 labeled images (12,500 cats, 12,500 dogs)
-- **Test Images**: 12,500 unlabeled images
-- **Image Format**: JPEG files with varying dimensions
+A binary image classification model that distinguishes between cats and dogs using **Support Vector Machine (SVM)** combined with **VGG16** transfer learning.
 
-## Methodology
+## Model Description
 
-### 1. Feature Extraction
-- **Input Size**: 224x224 pixels (RGB)
-- **Feature Vector**: 512-dimensional features extracted from the last pooling layer
-- **Preprocessing**: Images are preprocessed using VGG16's preprocessing function
+This model implements a hybrid approach combining classical machine learning with deep learning:
 
-### 2. Dimensionality Reduction
-- **Technique**: Principal Component Analysis (PCA)
-- **Target Dimensions**: 512 components
-- **Purpose**: Reduce computational complexity while preserving variance
+- **Feature Extraction**: VGG16 (pre-trained on ImageNet) extracts 512-dimensional feature vectors
+- **Dimensionality Reduction**: PCA maintains 512 components while decorrelating features
+- **Classification**: SVM with RBF kernel performs the final binary classification
 
-### 3. Feature Standardization
-- **Method**: StandardScaler (zero mean, unit variance)
-- **Applied**: Before PCA transformation
+### Model Architecture
 
-### 4. Classification
-- **Algorithm**: Support Vector Machine (SVM)
-- **Hyperparameter Tuning**: GridSearchCV with 3-fold cross-validation
-- **Parameters Tuned**:
-  - C (regularization): [0.1, 1, 10, 100]
-  - Gamma: ['scale', 'auto', 0.001, 0.01, 0.1]
-  - Kernel: ['rbf', 'linear']
-
-## Results
-
-### Model Performance
-- **Validation Accuracy**: ~98%
-- **Precision**: High (~99%)
-- **Recall**: High (~97%)
-- **F1-Score**: High (~98%)
-
-### Best Hyperparameters
-The optimal SVM configuration was determined through cross-validation.
-
-## Project Structure
 ```
-cats_dogs_svm/
-│
-├── dogs-vs-cats.ipynb      # Main implementation notebook
-├── README.md               # Project documentation
-├── TECHNICAL_REPORT.md     # Detailed mathematical concepts
-├── pyproject.toml          # Project dependencies
-└── svm_vgg16_cats_dogs.pkl # Saved model artifacts
+Input Image (224x224x3)
+    ↓
+VGG16 Feature Extractor (frozen)
+    ↓
+512-dimensional features
+    ↓
+StandardScaler (normalization)
+    ↓
+PCA (512 components)
+    ↓
+SVM (RBF kernel)
+    ↓
+Binary Output (Cat=0, Dog=1)
 ```
 
-## Dependencies
-- **Python**: 3.10+
-- **Key Libraries**:
-  - scikit-learn: Machine learning algorithms
-  - TensorFlow/Keras: Deep learning framework
-  - NumPy: Numerical computations
-  - Pandas: Data manipulation
-  - Matplotlib & Seaborn: Visualization
-  - OpenCV & scikit-image: Image processing
-  - tqdm: Progress bars
+## Intended Use
 
-## Key Features
-- ✅ Transfer learning with VGG16
-- ✅ Efficient feature extraction
-- ✅ Dimensionality reduction with PCA
-- ✅ Hyperparameter optimization
-- ✅ Comprehensive evaluation metrics
-- ✅ Visualization of results and misclassifications
-- ✅ Model persistence for deployment
+### Primary Use Cases
+- Binary classification of cat and dog images
+- Educational demonstration of transfer learning
+- Baseline model for image classification tasks
+- Feature extraction pipeline for similar datasets
 
-## Performance Considerations
-- **Training Subset**: Uses 2,000 training images for faster execution
-- **Validation Subset**: Uses 500 validation images
-- **Batch Processing**: Images processed in batches for efficiency
-- **Memory Management**: Features extracted and processed in manageable chunks
+### Out-of-Scope Use Cases
+- Multi-class classification (only cat/dog supported)
+- Real-time video classification (not optimized for speed)
+- Classification of other animals or objects
+- Medical or safety-critical applications
 
-## Visualization
-The notebook includes:
-- Confusion matrix heatmap
-- Sample predictions with confidence scores
-- Misclassified examples analysis
-- Error rate breakdown by class
+## Training Data
+
+- **Dataset**: Kaggle Dogs vs Cats Dataset
+- **Training Samples**: 2,000 images (1,000 cats, 1,000 dogs)
+- **Validation Samples**: 500 images (250 cats, 250 dogs)
+- **Image Format**: JPEG, various resolutions (resized to 224x224)
+- **Preprocessing**: VGG16-specific normalization (ImageNet mean subtraction)
+
+## Performance Metrics
+
+### Validation Set Performance
+
+| Metric | Score |
+|--------|-------|
+| **Accuracy** | ~98%+ |
+| **Precision** | >0.95 |
+| **Recall** | >0.95 |
+| **F1-Score** | >0.95 |
+
+### Confusion Matrix
+
+The model shows balanced performance across both classes with minimal misclassifications.
+
+### Class-Specific Performance
+
+- **Cat Classification**: High accuracy with low false positive rate
+- **Dog Classification**: High accuracy with low false negative rate
+
+## Hyperparameters
+
+### SVM Configuration
+- **Kernel**: RBF (Radial Basis Function)
+- **C**: Optimized via GridSearchCV
+- **Gamma**: Optimized via GridSearchCV
+- **Probability**: True (for confidence scores)
+
+### Feature Extraction
+- **Model**: VGG16
+- **Weights**: ImageNet pre-trained
+- **Pooling**: Global Average Pooling
+- **Output Dimension**: 512
+
+### Dimensionality Reduction
+- **Method**: PCA
+- **Components**: 512
+- **Explained Variance**: >95%
+
+## Limitations
+
+### Known Limitations
+
+1. **Dataset Size**: Trained on a subset (2,000 images) of the full dataset
+2. **Binary Classification Only**: Cannot distinguish between breeds or other animals
+3. **Image Quality**: Performance may degrade with low-quality or heavily occluded images
+4. **Bias**: May inherit biases from the pre-training
+5. **Computational Cost**: Requires TensorFlow for feature extraction
+
+
+## Training Procedure
+
+### Preprocessing
+
+1. **Image Loading**: Resize to 224x224 pixels
+2. **Normalization**: VGG16 preprocessing (ImageNet mean subtraction)
+3. **Feature Extraction**: VGG16 forward pass (512-d vectors)
+4. **Standardization**: Zero mean, unit variance
+5. **PCA**: Dimensionality reduction to 512 components
+
+### Training
+
+1. **Hyperparameter Search**: GridSearchCV with 3-fold cross-validation
+2. **Parameter Grid**:
+   - C: [0.1, 1, 10, 100]
+   - Gamma: ['scale', 'auto', 0.001, 0.01, 0.1]
+   - Kernel: ['rbf', 'linear']
+3. **Optimization**: Sequential Minimal Optimization (SMO)
+4. **Validation**: Stratified train-test split (80/20)
+
+## Evaluation
+
+### Methodology
+
+- **Split**: 80% train, 20% validation
+- **Stratification**: Balanced class distribution
+- **Metrics**: Accuracy, Precision, Recall, F1-Score
+- **Visualization**: Confusion matrix, prediction samples
+
+### Results Analysis
+
+- High accuracy across both classes
+- Minimal class imbalance
+- Strong generalization to validation set
+- Low variance in cross-validation scores
+
+
+## Additional Information
+
+### Repository
+- **GitHub**: [https://github.com/990aa/SCT_ML_3](https://github.com/990aa/SCT_ML_3)
+- **Technical Report**: See repository for detailed mathematical concepts
+
+### License
+This model is released under the MIT License.
+---
