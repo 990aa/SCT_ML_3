@@ -2,5 +2,4 @@
 __pycache__/
 *.pkl
 .env
-*.md
-*py 
+*.py
