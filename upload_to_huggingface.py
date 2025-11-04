@@ -11,13 +11,10 @@ USERNAME = "a-01a"
 MODEL_PATH = "svm_vgg16_cats_dogs.pkl"
 HF_TOKEN = os.getenv("HF_TOKEN_CD")
 
-# Files to upload (these should already exist)
+# Files to upload
 FILES_TO_UPLOAD = [
-    "app.py",
-    "requirements.txt", 
     "README.md",
     "config.json",
-    ".gitattributes"
 ]
 
 
@@ -45,19 +42,18 @@ def check_required_files():
 
 def upload_to_huggingface(username, repo_name, model_path):
     """
-    Upload model and files to Hugging Face Hub
+    Upload model and files to Hugging Face Hub as a model repository
     """
     try:
         api = HfApi()
         repo_id = f"{username}/{repo_name}"
         
-        # Create repository
-        print(f"\nCreating repository: {repo_id}")
+        # Create model repository
+        print(f"\nCreating model repository: {repo_id}")
         try:
             create_repo(
                 repo_id=repo_id,
-                repo_type="space",
-                space_sdk="gradio",
+                repo_type="model",
                 exist_ok=True
             )
             print(f"✓ Repository created/verified: {repo_id}")
@@ -71,7 +67,7 @@ def upload_to_huggingface(username, repo_name, model_path):
                 path_or_fileobj=model_path,
                 path_in_repo=os.path.basename(model_path),
                 repo_id=repo_id,
-                repo_type="space",
+                repo_type="model",
             )
             print(f"✓ Uploaded {model_path}")
         else:
@@ -86,20 +82,18 @@ def upload_to_huggingface(username, repo_name, model_path):
                     path_or_fileobj=file,
                     path_in_repo=file,
                     repo_id=repo_id,
-                    repo_type="space",
+                    repo_type="model",
                 )
                 print(f"✓ Uploaded {file}")
+            else:
+                print(f"⚠ Skipping {file} (not found)")
         
         print(f"\n🎉 Successfully uploaded to Hugging Face!")
-        print(f"🔗 View your Space at: https://huggingface.co/spaces/{repo_id}")
+        print(f"🔗 View your model at: https://huggingface.co/{repo_id}")
         return True
         
     except Exception as e:
         print(f"❌ Error uploading to Hugging Face: {e}")
-        print("\nMake sure you:")
-        print("1. Have huggingface_hub installed: pip install huggingface_hub")
-        print("2. Are logged in: huggingface-cli login")
-        print("3. Have a valid HuggingFace account")
         return False
 
 
@@ -132,11 +126,8 @@ def main():
             print(f"   - {file}")
         print("\nPlease ensure all required files exist before uploading:")
         print("   - svm_vgg16_cats_dogs.pkl (trained model)")
-        print("   - app.py (Gradio interface)")
-        print("   - requirements.txt (dependencies)")
         print("   - README.md (model card)")
         print("   - config.json (metadata)")
-        print("   - .gitattributes (Git LFS config)")
         return
     
     print("✓ All required files found!")
@@ -155,9 +146,8 @@ def main():
             print("🎊 UPLOAD COMPLETE!")
             print("=" * 60)
             print(f"\n🔗 Your model is now live at:")
-            print(f"   https://huggingface.co/spaces/{USERNAME}/{REPO_NAME}")
-            print("\n💡 The Gradio interface will be available in a few minutes")
-            print("   after the Space builds successfully.")
+            print(f"   https://huggingface.co/{USERNAME}/{REPO_NAME}")
+            print("\n💡 Use the inference.py script to download and use the model locally")
         else:
             print("\n❌ Upload failed. Check the error messages above.")
             
