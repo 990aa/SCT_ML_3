@@ -1,5 +1,4 @@
 import os
-import json
 from dotenv import load_dotenv
 from huggingface_hub import HfApi, create_repo, upload_file, login
 
@@ -11,6 +10,15 @@ REPO_NAME = "dogs-vs-cats-svm"
 USERNAME = "a-01a"  
 MODEL_PATH = "svm_vgg16_cats_dogs.pkl"
 HF_TOKEN = os.getenv("HF_TOKEN_CD")
+
+# Files to upload (these should already exist)
+FILES_TO_UPLOAD = [
+    "app.py",
+    "requirements.txt", 
+    "README.md",
+    "config.json",
+    ".gitattributes"
+]
 
 
 def login_to_huggingface():
