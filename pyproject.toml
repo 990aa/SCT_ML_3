@@ -3,7 +3,7 @@ name = "cats-dogs-svm"
 version = "0.1.0"
 description = "dogs vs cats classifier"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
     "dotenv>=0.9.9",
     "huggingface-hub>=1.0.1",

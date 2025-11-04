@@ -160,7 +160,7 @@ def create_requirements_file():
     """
     Create requirements.txt for Hugging Face Space
     """
-    requirements = """gradio==4.44.0
+    requirements = """gradio==4.35.0
 tensorflow>=2.13.0,<2.18.0
 scikit-learn>=1.3.0
 numpy>=1.24.0,<2.0.0
