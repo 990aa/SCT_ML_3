@@ -1,6 +1,6 @@
 """
-Dogs vs Cats Classifier - Local Inference Script
-Downloads the model from Hugging Face Hub and runs predictions on uploaded images.
+Dogs vs Cats Classifier
+Loads the trained .keras model and makes predictions
 
 Author: Abdul Ahad (990aa)
 """
@@ -8,70 +8,101 @@ Author: Abdul Ahad (990aa)
 import os
 import sys
 import numpy as np
-import joblib
+import h5py
 import warnings
-from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input
+from tensorflow.keras.models import load_model
+from tensorflow.keras.applications.vgg16 import preprocess_input
 from tensorflow.keras.preprocessing import image
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn import svm
 from huggingface_hub import hf_hub_download
 
-# Suppress warnings
 warnings.filterwarnings('ignore')
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TensorFlow info messages
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-# Configuration
 REPO_ID = "a-01a/dogs-vs-cats-svm"
-MODEL_FILENAME = "svm_vgg16_cats_dogs.pkl"
+FEATURE_EXTRACTOR_FILENAME = "cats-vs-dogs.keras"
+COMPONENTS_FILENAME = "cats-vs-dogs-components.keras"
 IMAGE_SIZE = (224, 224)
-LOCAL_CACHE_DIR = "./model_cache"  # Local cache directory
+LOCAL_CACHE_DIR = "./model_cache"
 
 
-def download_model():
-    """Download model from Hugging Face Hub to local cache"""
-    print("📥 Downloading model from Hugging Face Hub...")
+def download_model_files():
+    """Download .keras model files from Hugging Face Hub"""
+    print("Downloading model from Hugging Face Hub...")
     try:
-        # Create local cache directory if it doesn't exist
         os.makedirs(LOCAL_CACHE_DIR, exist_ok=True)
         
-        model_path = hf_hub_download(
+        feature_path = hf_hub_download(
             repo_id=REPO_ID,
-            filename=MODEL_FILENAME,
+            filename=FEATURE_EXTRACTOR_FILENAME,
             repo_type="model",
-            cache_dir=LOCAL_CACHE_DIR  # Use local cache directory
+            cache_dir=LOCAL_CACHE_DIR
         )
-        print(f"✓ Model downloaded to: {model_path}")
-        return model_path
+        
+        components_path = hf_hub_download(
+            repo_id=REPO_ID,
+            filename=COMPONENTS_FILENAME,
+            repo_type="model",
+            cache_dir=LOCAL_CACHE_DIR
+        )
+        
+        print("✓ Model files downloaded")
+        return feature_path, components_path
+            
     except Exception as e:
         print(f"❌ Error downloading model: {e}")
-        return None
+        return None, None
 
 
-def load_model(model_path):
-    """Load the trained model and feature extractor"""
-    print("🔧 Loading model components...")
+def load_model_keras(feature_path, components_path):
+    """Load model from .keras format"""
+    print("Loading model components...")
     try:
-        # Load VGG16 for feature extraction (without top layers)
-        vgg_model = VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
-        print("✓ VGG16 feature extractor loaded")
+        # Load feature extractor
+        feature_extractor = load_model(feature_path)
+        print("✓ Feature extractor loaded")
         
-        # Load the trained SVM model
-        model_data = joblib.load(model_path)
-        
-        # Check the structure of the loaded data
-        if isinstance(model_data, dict):
-            svm_model = model_data.get('svm_model') or model_data.get('model')
-            pca = model_data.get('pca')
-            scaler = model_data.get('scaler')  # Load scaler if available
-        else:
-            print("❌ Unexpected model format")
-            return None, None, None, None
-        
-        if svm_model is None or pca is None:
-            print(f"❌ Missing components. Available keys: {list(model_data.keys())}")
-            return None, None, None, None
+        # Load components from .keras file (HDF5)
+        with h5py.File(components_path, 'r') as f:
+            # Load PCA
+            pca = PCA(n_components=f['pca'].attrs['n_components'])
+            pca.components_ = f['pca/components'][:]
+            pca.mean_ = f['pca/mean'][:]
+            pca.explained_variance_ = f['pca/explained_variance'][:]
+            pca.n_components_ = f['pca'].attrs['n_components']
             
-        print("✓ SVM model and PCA loaded")
+            # Load Scaler
+            scaler = StandardScaler()
+            scaler.mean_ = f['scaler/mean'][:]
+            scaler.scale_ = f['scaler/scale'][:]
+            
+            # Load SVM
+            gamma_val = f['svm'].attrs['gamma']
+            gamma = float(gamma_val) if isinstance(gamma_val, (int, float, np.number)) else gamma_val
+            
+            svm_model = svm.SVC(
+                kernel=f['svm'].attrs['kernel'],
+                C=f['svm'].attrs['C'],
+                gamma=gamma,
+                probability=True
+            )
+            
+            svm_model.support_vectors_ = f['svm/support_vectors'][:]
+            svm_model.dual_coef_ = f['svm/dual_coef'][:]
+            svm_model.intercept_ = f['svm/intercept'][:]
+            svm_model.support_ = f['svm/support'][:]
+            svm_model.n_support_ = np.array([
+                f['svm'].attrs['n_support_0'],
+                f['svm'].attrs['n_support_1']
+            ])
+            svm_model._gamma = gamma
+            svm_model.classes_ = np.array([0, 1])
+            
+        print("✓ PCA, Scaler, and SVM loaded")
+        return feature_extractor, svm_model, pca, scaler
         
-        return vgg_model, svm_model, pca, scaler
     except Exception as e:
         print(f"❌ Error loading model: {e}")
         import traceback
@@ -93,52 +124,45 @@ def preprocess_image(img_path):
         return None
 
 
-def predict_image(img_path, vgg_model, svm_model, pca, scaler=None):
+def predict_image(img_path, feature_extractor, svm_model, pca, scaler):
     """Predict whether the image is a cat or dog"""
-    # Preprocess image
     img_array = preprocess_image(img_path)
     if img_array is None:
         return None, None
     
-    # Extract features using VGG16
-    features = vgg_model.predict(img_array, verbose=0)
+    # Extract features
+    features = feature_extractor.predict(img_array, verbose=0)
     features_flat = features.reshape(1, -1)
     
-    # Apply PCA first
+    # Apply PCA
     features_pca = pca.transform(features_flat)
     
-    # Apply scaler AFTER PCA (this model was trained with scaler after PCA)
-    if scaler is not None:
-        features_pca = scaler.transform(features_pca)
+    # Apply scaling
+    features_scaled = scaler.transform(features_pca)
     
-    # Predict with SVM
-    prediction = svm_model.predict(features_pca)[0]
-    
-    # Get confidence score
+    # Predict
     try:
-        decision_score = svm_model.decision_function(features_pca)[0]
-        # Convert to probability score
-        confidence = 1 / (1 + np.exp(-decision_score))
-        if prediction == 0:  # Cat
-            confidence = 1 - confidence
-    except:
-        confidence = 0.5
-    
-    return prediction, confidence
+        prediction = svm_model.predict(features_scaled)[0]
+        probability = svm_model.predict_proba(features_scaled)[0]
+        confidence = probability[prediction]
+        
+        return prediction, confidence
+    except Exception as e:
+        print(f"❌ Prediction error: {e}")
+        return None, None
 
 
 def main():
     """Main execution function"""
     print("=" * 70)
-    print("🐱🐶 Dogs vs Cats Classifier - Local Inference")
+    print("🐱🐶 Dogs vs Cats Classifier - Inference (.keras format)")
     print("=" * 70)
     
     # Check if image path is provided
     if len(sys.argv) < 2:
         print("\n❌ Usage: python inference.py <path_to_image>")
         print("\nExample:")
-        print("   python inference.py my_pet.jpg")
-        print("   python inference.py C:\\Users\\username\\Downloads\\dog.png")
+        print("   python inference.py test/cat1.jpeg")
         return
     
     img_path = sys.argv[1]
@@ -148,21 +172,32 @@ def main():
         print(f"\n❌ Image not found: {img_path}")
         return
     
-    print(f"\n📸 Image: {img_path}")
+    print(f"\nImage: {img_path}")
     
-    # Download model from Hugging Face
-    model_path = download_model()
-    if model_path is None:
-        return
+    # Check if models exist locally first
+    local_feature_path = "cats-vs-dogs.keras"
+    local_components_path = "cats-vs-dogs-components.keras"
+    
+    if os.path.exists(local_feature_path) and os.path.exists(local_components_path):
+        print("\n✓ Using local model files")
+        feature_path = local_feature_path
+        components_path = local_components_path
+    else:
+        # Download from HuggingFace
+        print()
+        feature_path, components_path = download_model_files()
+        if feature_path is None:
+            return
     
     # Load model components
-    vgg_model, svm_model, pca, scaler = load_model(model_path)
-    if vgg_model is None or svm_model is None or pca is None:
+    print()
+    feature_extractor, svm_model, pca, scaler = load_model_keras(feature_path, components_path)
+    if feature_extractor is None or svm_model is None or pca is None:
         return
     
     # Make prediction
     print("\n🔮 Making prediction...")
-    prediction, confidence = predict_image(img_path, vgg_model, svm_model, pca, scaler)
+    prediction, confidence = predict_image(img_path, feature_extractor, svm_model, pca, scaler)
     
     if prediction is None:
         print("❌ Prediction failed")
@@ -170,19 +205,19 @@ def main():
     
     # Display results
     print("\n" + "=" * 70)
-    print("📊 PREDICTION RESULTS")
+    print("PREDICTION RESULTS")
     print("=" * 70)
     
     label = "🐱 Cat" if prediction == 0 else "🐶 Dog"
-    print(f"\n🎯 Prediction: {label}")
-    print(f"📈 Confidence: {confidence:.2%}")
+    print(f"\nPrediction: {label}")
+    print(f"Confidence: {confidence:.2%}")
     
     if confidence > 0.8:
-        print(f"✅ High confidence - Very likely a {label}")
+        print(f"High confidence - Very likely a {label}")
     elif confidence > 0.6:
-        print(f"⚠️  Medium confidence - Probably a {label}")
+        print(f"Medium confidence - Probably a {label}")
     else:
-        print("❓ Low confidence - Uncertain prediction")
+        print("Low confidence - Uncertain prediction")
     
     print("\n" + "=" * 70)
 

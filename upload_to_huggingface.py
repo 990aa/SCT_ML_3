@@ -8,11 +8,12 @@ load_dotenv()
 # Configuration
 REPO_NAME = "dogs-vs-cats-svm"  
 USERNAME = "a-01a"  
-MODEL_PATH = "svm_vgg16_cats_dogs.pkl"
+MODEL_PATH = "cats-vs-dogs.keras"  # Main feature extractor model
 HF_TOKEN = os.getenv("HF_TOKEN_CD")
 
-# Files to upload
+# Files to upload (.keras format only)
 FILES_TO_UPLOAD = [
+    "cats-vs-dogs-components.keras",  # PCA, Scaler, and SVM components
     "README.md",
     "config.json",
 ]
@@ -125,7 +126,8 @@ def main():
         for file in missing_files:
             print(f"   - {file}")
         print("\nPlease ensure all required files exist before uploading:")
-        print("   - svm_vgg16_cats_dogs.pkl (trained model)")
+        print("   - cats-vs-dogs.keras (feature extractor)")
+        print("   - cats-vs-dogs-components.keras (PCA/Scaler/SVM)")
         print("   - README.md (model card)")
         print("   - config.json (metadata)")
         return
@@ -147,7 +149,7 @@ def main():
             print("=" * 60)
             print("\n🔗 Your model is now live at:")
             print(f"   https://huggingface.co/{USERNAME}/{REPO_NAME}")
-            print("\n💡 Use the inference.py script to download and use the model locally")
+            print("💡 Use the inference.py script to download and use the model locally")
         else:
             print("\n❌ Upload failed. Check the error messages above.")
             

@@ -1,8 +1,13 @@
 .venv/
 __pycache__/
 *.pkl
+*.keras
 .env
 test/
 .ruff_cache/
-*.md
 model_cache/
+dogs-vs-cats1/
+dogs-vs-cats1/test1/
+kaggle_data/
+.md/
+*.ipynb

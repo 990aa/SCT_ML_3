@@ -4,9 +4,9 @@
 
 ### Model Description
 
-This is a binary image classification model that distinguishes between images of cats and dogs. The model uses a hybrid approach combining transfer learning with classical machine learning:
+This is a binary image classification model that distinguishes between images of cats and dogs. The model uses a hybrid approach combining transfer learning with classical machine learning, trained on **combined datasets** for improved accuracy:
 
-- **Feature Extraction**: VGG16 (pre-trained on ImageNet)
+- **Feature Extraction**: VGG16 + Global Average Pooling (pre-trained on ImageNet)
 - **Dimensionality Reduction**: Principal Component Analysis (PCA)
 - **Classification**: Support Vector Machine (SVM) with RBF kernel
 
@@ -14,7 +14,8 @@ This is a binary image classification model that distinguishes between images of
 - **Task**: Binary Image Classification
 - **Architecture**: VGG16 + SVM
 - **Framework**: TensorFlow/Keras + scikit-learn
-- **Model Size**: ~90MB
+- **Model Format**: .keras (modern serialization)
+- **Model Size**: ~61MB (feature extractor + components)
 - **License**: MIT
 
 ### Model Developer
@@ -32,30 +33,36 @@ This is a binary image classification model that distinguishes between images of
 ## Training Data
 
 ### Dataset Information
-- **Source**: Kaggle Dogs vs Cats Dataset
-- **Original Size**: 25,000 labeled images
-- **Training Subset**: 2,000 images (memory/time constraints)
-  - 1,000 cat images
-  - 1,000 dog images
-- **Validation Subset**: 500 images
-  - 250 cat images
-  - 250 dog images
+- **Source 1**: Kaggle Dogs vs Cats Dataset (`dog-and-cat-classification-dataset`)
+  - Downloaded to: `./kaggle_data/`
+  - Training Subset: ~5,000 images (2,500 cats, 2,500 dogs)
+  
+- **Source 2**: Local Dogs vs Cats Dataset (`dogs-vs-cats/train`)
+  - Training Subset: ~5,000 images (2,500 cats, 2,500 dogs)
+
+- **Combined Total**: ~10,000 labeled images from diverse sources
+- **Validation Subset**: 20% of combined data (~2,000 images)
+  - ~1,000 cat images
+  - ~1,000 dog images
 
 ### Data Characteristics
 - **Format**: JPEG images
 - **Resolution**: Variable (resized to 224×224)
 - **Color**: RGB (3 channels)
 - **Classes**: Binary (Cat=0, Dog=1)
-- **Balance**: Perfectly balanced dataset
+- **Balance**: Perfectly balanced dataset (50/50 split)
+- **Diversity**: Combined from two different sources for better generalization
 
 ### Preprocessing Pipeline
-1. **Resizing**: All images resized to 224×224 pixels
-2. **Normalization**: VGG16-specific preprocessing
+1. **Dataset Download**: Kaggle dataset to local `./kaggle_data/` folder
+2. **Dataset Combination**: Merge images from Kaggle + local datasets
+3. **Resizing**: All images resized to 224×224 pixels
+4. **Normalization**: VGG16-specific preprocessing
    - Subtract ImageNet mean: [123.68, 116.779, 103.939]
    - RGB channel order
-3. **Feature Extraction**: VGG16 forward pass → 512-d vectors
-4. **Standardization**: Zero mean, unit variance
-5. **Dimensionality Reduction**: PCA to 512 components
+5. **Feature Extraction**: VGG16 + Global Average Pooling → 512-d vectors
+6. **Standardization**: Zero mean, unit variance
+7. **Dimensionality Reduction**: PCA to 256 components
 
 ## Model Architecture
 
@@ -144,14 +151,16 @@ param_grid = {
 
 ## Performance
 
-### Validation Metrics
+### Performance Metrics
 
 | Metric | Score |
 |--------|-------|
-| **Accuracy** | ~98.0% |
-| **Precision** | >95.0% |
-| **Recall** | >95.0% |
-| **F1-Score** | >95.0% |
+| **Accuracy** | ~87-95% |
+| **Precision** | >85.0% |
+| **Recall** | >85.0% |
+| **F1-Score** | >85.0% |
+
+*Performance varies based on training configuration (dataset size, PCA components)*
 
 ### Confusion Matrix (Approximate)
 
@@ -182,7 +191,7 @@ param_grid = {
 ### Known Limitations
 
 1. **Dataset Size**
-   - Trained on only 2,000 images (subset of full dataset)
+   - Trained on ~10,000 images (combined from two sources)
    - May not generalize to all breeds or poses
    - Limited representation of edge cases
 
@@ -256,10 +265,14 @@ param_grid = {
 
 ### Model Files
 
-- **svm_vgg16_cats_dogs.pkl**: Main model artifact (~90MB)
-  - Contains: SVM model, scaler, PCA, feature extractor
-  - Format: Joblib pickle
-  - Compression: Default
+- **cats-vs-dogs.keras**: VGG16 + Global Average Pooling feature extractor (~58 MB)
+  - Format: TensorFlow SavedModel (HDF5)
+  - Content: Pre-trained VGG16 with frozen weights
+  
+- **cats-vs-dogs-components.keras**: PCA, Scaler, and SVM components (~3-5 MB)
+  - Format: HDF5 (h5py)
+  - Content: PCA parameters, StandardScaler parameters, SVM support vectors
+  - Components: Dimensionality reduction + normalization + classifier
 
 ## Citation
 
