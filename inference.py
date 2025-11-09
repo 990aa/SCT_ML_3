@@ -9,7 +9,6 @@ import os
 import sys
 import numpy as np
 import joblib
-from PIL import Image
 from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input
 from tensorflow.keras.preprocessing import image
 from huggingface_hub import hf_hub_download
@@ -90,12 +89,12 @@ def predict_image(img_path, vgg_model, svm_model, pca):
     # Get confidence score
     try:
         decision_score = svm_model.decision_function(features_pca)[0]
-        # Convert to probability-like score
+        # Convert to probability score
         confidence = 1 / (1 + np.exp(-decision_score))
         if prediction == 0:  # Cat
             confidence = 1 - confidence
     except:
-        confidence = 0.5  # Default if decision function not available
+        confidence = 0.5
     
     return prediction, confidence
 
@@ -155,7 +154,7 @@ def main():
     elif confidence > 0.6:
         print(f"⚠️  Medium confidence - Probably a {label}")
     else:
-        print(f"❓ Low confidence - Uncertain prediction")
+        print("❓ Low confidence - Uncertain prediction")
     
     print("\n" + "=" * 70)
 

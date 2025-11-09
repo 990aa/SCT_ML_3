@@ -88,7 +88,7 @@ def upload_to_huggingface(username, repo_name, model_path):
             else:
                 print(f"⚠ Skipping {file} (not found)")
         
-        print(f"\n🎉 Successfully uploaded to Hugging Face!")
+        print("\n🎉 Successfully uploaded to Hugging Face!")
         print(f"🔗 View your model at: https://huggingface.co/{repo_id}")
         return True
         
@@ -107,12 +107,12 @@ def main():
     
     # Check if token exists
     if not HF_TOKEN:
-        print(f"❌ HuggingFace token not found in .env file!")
+        print("❌ HuggingFace token not found in .env file!")
         print("Please add HF_TOKEN_CD to your .env file")
         print("Get your token from: https://huggingface.co/settings/tokens")
         return
     
-    print(f"✓ Found HuggingFace token in .env")
+    print("✓ Found HuggingFace token in .env")
     print(f"✓ Username: {USERNAME}")
     print(f"✓ Repository: {REPO_NAME}")
     
@@ -121,7 +121,7 @@ def main():
     missing_files = check_required_files()
     
     if missing_files:
-        print(f"❌ Missing required files:")
+        print("❌ Missing required files:")
         for file in missing_files:
             print(f"   - {file}")
         print("\nPlease ensure all required files exist before uploading:")
@@ -145,7 +145,7 @@ def main():
             print("\n" + "=" * 60)
             print("🎊 UPLOAD COMPLETE!")
             print("=" * 60)
-            print(f"\n🔗 Your model is now live at:")
+            print("\n🔗 Your model is now live at:")
             print(f"   https://huggingface.co/{USERNAME}/{REPO_NAME}")
             print("\n💡 Use the inference.py script to download and use the model locally")
         else:
