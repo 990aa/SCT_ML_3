@@ -308,11 +308,11 @@ param_grid = {
 
 ### Model Files
 
-- **cats-vs-dogs.keras**: VGG16 + Global Average Pooling feature extractor (~58 MB)
+- **cats-vs-dogs-components.keras**: VGG16 + Global Average Pooling feature extractor (~58 MB)
   - Format: TensorFlow SavedModel (HDF5)
   - Content: Pre-trained VGG16 with frozen weights
   
-- **cats-vs-dogs.keras**: PCA, Scaler, and SVM components (~3-5 MB)
+- **cats-vs-dogs-components.keras**: PCA, Scaler, and SVM components (~3-5 MB)
   - Format: HDF5 (h5py)
   - Content: PCA parameters, StandardScaler parameters, SVM support vectors
   - Components: Dimensionality reduction + normalization + classifier
