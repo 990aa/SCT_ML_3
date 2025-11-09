@@ -1,3 +1,46 @@
+---
+license: mit
+tags:
+  - image-classification
+  - computer-vision
+  - cats-vs-dogs
+  - svm
+  - vgg16
+  - transfer-learning
+  - keras
+  - tensorflow
+  - scikit-learn
+language:
+  - en
+metrics:
+  - accuracy
+  - precision
+  - recall
+  - f1
+library_name: keras
+datasets:
+  - dogs-vs-cats
+model-index:
+  - name: Dogs vs Cats Classifier
+    results:
+      - task:
+          type: image-classification
+          name: Image Classification
+        dataset:
+          name: Dogs vs Cats
+          type: dogs-vs-cats
+        metrics:
+          - type: accuracy
+            value: 0.90
+            name: Accuracy
+          - type: precision
+            value: 0.89
+            name: Precision
+          - type: recall
+            value: 0.91
+            name: Recall
+---
+
 # Model Card: Dogs vs Cats Classifier
 
 ## Model Details

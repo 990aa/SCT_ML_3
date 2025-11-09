@@ -1,3 +1,26 @@
+---
+license: mit
+tags:
+  - image-classification
+  - computer-vision
+  - cats-vs-dogs
+  - svm
+  - vgg16
+  - transfer-learning
+  - keras
+  - tensorflow
+  - scikit-learn
+language:
+  - en
+metrics:
+  - accuracy
+  - precision
+  - recall
+library_name: keras
+datasets:
+  - dogs-vs-cats
+---
+
 # 🐱🐶 Dogs vs Cats Classifier
 
 A binary image classification model that distinguishes between cats and dogs using **Support Vector Machine (SVM)** combined with **VGG16** transfer learning. The model is trained on **two combined datasets** and saved in modern **.keras format**.
