@@ -8,7 +8,7 @@ load_dotenv()
 # Configuration
 REPO_NAME = "dogs-vs-cats-svm"  
 USERNAME = "a-01a"  
-MODEL_PATH = "cats-vs-dogs-components.keras"  # Main feature extractor model
+MODEL_PATH = "cats-vs-dogs.keras"  # Main feature extractor model
 HF_TOKEN = os.getenv("HF_TOKEN_CD")
 
 # Files to upload (.keras format only)
@@ -126,7 +126,7 @@ def main():
         for file in missing_files:
             print(f"   - {file}")
         print("\nPlease ensure all required files exist before uploading:")
-        print("   - cats-vs-dogs-components.keras (feature extractor)")
+        print("   - cats-vs-dogs.keras (feature extractor)")
         print("   - cats-vs-dogs-components.keras (PCA/Scaler/SVM)")
         print("   - README.md (model card)")
         print("   - config.json (metadata)")

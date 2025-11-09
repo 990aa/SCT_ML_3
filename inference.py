@@ -22,7 +22,7 @@ warnings.filterwarnings('ignore')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 REPO_ID = "a-01a/dogs-vs-cats-svm"
-FEATURE_EXTRACTOR_FILENAME = "cats-vs-dogs-components.keras"
+FEATURE_EXTRACTOR_FILENAME = "cats-vs-dogs.keras"
 COMPONENTS_FILENAME = "cats-vs-dogs-components.keras"
 IMAGE_SIZE = (224, 224)
 LOCAL_CACHE_DIR = "./model_cache"
@@ -91,14 +91,29 @@ def load_model_keras(feature_path, components_path):
             
             svm_model.support_vectors_ = f['svm/support_vectors'][:]
             svm_model.dual_coef_ = f['svm/dual_coef'][:]
+            svm_model._dual_coef_ = f['svm/dual_coef'][:]
             svm_model.intercept_ = f['svm/intercept'][:]
+            svm_model._intercept_ = f['svm/intercept'][:]
             svm_model.support_ = f['svm/support'][:]
-            svm_model.n_support_ = np.array([
+            svm_model._n_support = np.array([
                 f['svm'].attrs['n_support_0'],
                 f['svm'].attrs['n_support_1']
             ])
             svm_model._gamma = gamma
             svm_model.classes_ = np.array([0, 1])
+            svm_model._sparse = False
+            svm_model.shape_fit_ = (svm_model.support_vectors_.shape[0], svm_model.support_vectors_.shape[1])
+            
+            # Load probability calibration parameters if they exist
+            if 'probA' in f['svm']:
+                svm_model._probA = f['svm/probA'][:]
+            else:
+                svm_model._probA = np.array([])
+                
+            if 'probB' in f['svm']:
+                svm_model._probB = f['svm/probB'][:]
+            else:
+                svm_model._probB = np.array([])
             
         print("✓ PCA, Scaler, and SVM loaded")
         return feature_extractor, svm_model, pca, scaler
@@ -175,7 +190,7 @@ def main():
     print(f"\nImage: {img_path}")
     
     # Check if models exist locally first
-    local_feature_path = "cats-vs-dogs-components.keras"
+    local_feature_path = "cats-vs-dogs.keras"
     local_components_path = "cats-vs-dogs-components.keras"
     
     if os.path.exists(local_feature_path) and os.path.exists(local_components_path):
