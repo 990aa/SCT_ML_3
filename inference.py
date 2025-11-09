@@ -104,12 +104,12 @@ def predict_image(img_path, vgg_model, svm_model, pca, scaler=None):
     features = vgg_model.predict(img_array, verbose=0)
     features_flat = features.reshape(1, -1)
     
-    # Apply scaler if available (BEFORE PCA)
-    if scaler is not None:
-        features_flat = scaler.transform(features_flat)
-    
-    # Apply PCA (AFTER scaling)
+    # Apply PCA first
     features_pca = pca.transform(features_flat)
+    
+    # Apply scaler AFTER PCA (this model was trained with scaler after PCA)
+    if scaler is not None:
+        features_pca = scaler.transform(features_pca)
     
     # Predict with SVM
     prediction = svm_model.predict(features_pca)[0]
