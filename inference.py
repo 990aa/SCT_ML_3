@@ -196,7 +196,7 @@ def main():
         return
     
     # Make prediction
-    print("\n🔮 Making prediction...")
+    print("\nMaking prediction...")
     prediction, confidence = predict_image(img_path, feature_extractor, svm_model, pca, scaler)
     
     if prediction is None:

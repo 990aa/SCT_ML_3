@@ -2,13 +2,6 @@
 
 A binary image classification model that distinguishes between cats and dogs using **Support Vector Machine (SVM)** combined with **VGG16** transfer learning. The model is trained on **two combined datasets** and saved in modern **.keras format**.
 
-## 🆕 Latest Updates
-
-- ✅ **Multi-Dataset Training**: Combines Kaggle + local datasets for better accuracy
-- ✅ **Pure .keras Format**: Modern serialization (no more .pkl files)
-- ✅ **Local Dataset Download**: Kaggle data downloads to `./kaggle_data/` for easy management
-- ✅ **Improved Accuracy**: Training on 10,000+ images from diverse sources
-
 ## Model Description
 
 This model implements a hybrid approach combining classical machine learning with deep learning:
@@ -61,14 +54,14 @@ Image: test/cat1.jpeg
 
 ✓ Using local model files
 
-🔧 Loading model components...
+Loading model components...
 ✓ Feature extractor loaded
 ✓ PCA, Scaler, and SVM loaded
 
-🔮 Making prediction...
+Making prediction...
 
-📊 Prediction: Cat 🐱
-💯 Confidence: 92.34%
+Prediction: Cat 🐱
+Confidence: 92.34%
 ```
 
 ---
@@ -149,7 +142,7 @@ Edit `train_model.ipynb` Cell 4 for different configurations:
 | **Maximum** | 25K (12.5K each) | 60-90 min | ~95% |
 
 ```python
-N_SAMPLES_PER_DATASET = 5000  # Adjust this value
+N_SAMPLES_PER_DATASET = 5000  # Adjust
 PCA_COMPONENTS = 256           # 128 (fast), 256 (balanced), 512 (max)
 ```
 
