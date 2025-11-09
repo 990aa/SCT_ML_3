@@ -223,7 +223,8 @@ def main():
     print("PREDICTION RESULTS")
     print("=" * 70)
     
-    label = "🐱 Cat" if prediction == 0 else "🐶 Dog"
+    # Note: Labels are inverted - model predicts 0 for dogs, 1 for cats
+    label = "🐶 Dog" if prediction == 0 else "😺 Cat"
     print(f"\nPrediction: {label}")
     print(f"Confidence: {confidence:.2%}")
     
