@@ -9,24 +9,34 @@ import os
 import sys
 import numpy as np
 import joblib
+import warnings
 from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input
 from tensorflow.keras.preprocessing import image
 from huggingface_hub import hf_hub_download
+
+# Suppress warnings
+warnings.filterwarnings('ignore')
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TensorFlow info messages
 
 # Configuration
 REPO_ID = "a-01a/dogs-vs-cats-svm"
 MODEL_FILENAME = "svm_vgg16_cats_dogs.pkl"
 IMAGE_SIZE = (224, 224)
+LOCAL_CACHE_DIR = "./model_cache"  # Local cache directory
 
 
 def download_model():
-    """Download model from Hugging Face Hub"""
+    """Download model from Hugging Face Hub to local cache"""
     print("📥 Downloading model from Hugging Face Hub...")
     try:
+        # Create local cache directory if it doesn't exist
+        os.makedirs(LOCAL_CACHE_DIR, exist_ok=True)
+        
         model_path = hf_hub_download(
             repo_id=REPO_ID,
             filename=MODEL_FILENAME,
-            repo_type="model"
+            repo_type="model",
+            cache_dir=LOCAL_CACHE_DIR  # Use local cache directory
         )
         print(f"✓ Model downloaded to: {model_path}")
         return model_path
@@ -45,14 +55,28 @@ def load_model(model_path):
         
         # Load the trained SVM model
         model_data = joblib.load(model_path)
-        svm_model = model_data['model']
-        pca = model_data['pca']
+        
+        # Check the structure of the loaded data
+        if isinstance(model_data, dict):
+            svm_model = model_data.get('svm_model') or model_data.get('model')
+            pca = model_data.get('pca')
+            scaler = model_data.get('scaler')  # Load scaler if available
+        else:
+            print("❌ Unexpected model format")
+            return None, None, None, None
+        
+        if svm_model is None or pca is None:
+            print(f"❌ Missing components. Available keys: {list(model_data.keys())}")
+            return None, None, None, None
+            
         print("✓ SVM model and PCA loaded")
         
-        return vgg_model, svm_model, pca
+        return vgg_model, svm_model, pca, scaler
     except Exception as e:
         print(f"❌ Error loading model: {e}")
-        return None, None, None
+        import traceback
+        traceback.print_exc()
+        return None, None, None, None
 
 
 def preprocess_image(img_path):
@@ -69,7 +93,7 @@ def preprocess_image(img_path):
         return None
 
 
-def predict_image(img_path, vgg_model, svm_model, pca):
+def predict_image(img_path, vgg_model, svm_model, pca, scaler=None):
     """Predict whether the image is a cat or dog"""
     # Preprocess image
     img_array = preprocess_image(img_path)
@@ -79,6 +103,10 @@ def predict_image(img_path, vgg_model, svm_model, pca):
     # Extract features using VGG16
     features = vgg_model.predict(img_array, verbose=0)
     features_flat = features.reshape(1, -1)
+    
+    # Apply scaler if available
+    if scaler is not None:
+        features_flat = scaler.transform(features_flat)
     
     # Apply PCA
     features_pca = pca.transform(features_flat)
@@ -128,13 +156,13 @@ def main():
         return
     
     # Load model components
-    vgg_model, svm_model, pca = load_model(model_path)
+    vgg_model, svm_model, pca, scaler = load_model(model_path)
     if vgg_model is None or svm_model is None or pca is None:
         return
     
     # Make prediction
     print("\n🔮 Making prediction...")
-    prediction, confidence = predict_image(img_path, vgg_model, svm_model, pca)
+    prediction, confidence = predict_image(img_path, vgg_model, svm_model, pca, scaler)
     
     if prediction is None:
         print("❌ Prediction failed")
