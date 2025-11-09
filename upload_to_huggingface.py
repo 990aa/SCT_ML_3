@@ -13,7 +13,7 @@ HF_TOKEN = os.getenv("HF_TOKEN_CD")
 
 # Files to upload (.keras format only)
 FILES_TO_UPLOAD = [
-    "cats-vs-dogs-components.keras",  # PCA, Scaler, and SVM components
+    "cats-vs-dogs.keras",  # PCA, Scaler, and SVM components
     "README.md",
     "config.json",
 ]
@@ -127,7 +127,7 @@ def main():
             print(f"   - {file}")
         print("\nPlease ensure all required files exist before uploading:")
         print("   - cats-vs-dogs.keras (feature extractor)")
-        print("   - cats-vs-dogs-components.keras (PCA/Scaler/SVM)")
+        print("   - cats-vs-dogs.keras (PCA/Scaler/SVM)")
         print("   - README.md (model card)")
         print("   - config.json (metadata)")
         return

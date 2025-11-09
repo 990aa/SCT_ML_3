@@ -23,7 +23,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 REPO_ID = "a-01a/dogs-vs-cats-svm"
 FEATURE_EXTRACTOR_FILENAME = "cats-vs-dogs.keras"
-COMPONENTS_FILENAME = "cats-vs-dogs-components.keras"
+COMPONENTS_FILENAME = "cats-vs-dogs.keras"
 IMAGE_SIZE = (224, 224)
 LOCAL_CACHE_DIR = "./model_cache"
 
@@ -176,7 +176,7 @@ def main():
     
     # Check if models exist locally first
     local_feature_path = "cats-vs-dogs.keras"
-    local_components_path = "cats-vs-dogs-components.keras"
+    local_components_path = "cats-vs-dogs.keras"
     
     if os.path.exists(local_feature_path) and os.path.exists(local_components_path):
         print("\n✓ Using local model files")

@@ -7,7 +7,6 @@ test/
 .ruff_cache/
 model_cache/
 dogs-vs-cats1/
-dogs-vs-cats1/test1/
+dogs-vs-cats2/
 kaggle_data/
 .md/
-*.ipynb

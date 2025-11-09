@@ -269,7 +269,7 @@ param_grid = {
   - Format: TensorFlow SavedModel (HDF5)
   - Content: Pre-trained VGG16 with frozen weights
   
-- **cats-vs-dogs-components.keras**: PCA, Scaler, and SVM components (~3-5 MB)
+- **cats-vs-dogs.keras**: PCA, Scaler, and SVM components (~3-5 MB)
   - Format: HDF5 (h5py)
   - Content: PCA parameters, StandardScaler parameters, SVM support vectors
   - Components: Dimensionality reduction + normalization + classifier

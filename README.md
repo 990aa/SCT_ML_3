@@ -38,7 +38,7 @@ Binary Output (Cat=0, Dog=1)
 ### Model Files
 
 - **cats-vs-dogs.keras** (~58 MB): VGG16 + Global Average Pooling feature extractor
-- **cats-vs-dogs-components.keras** (~3-5 MB): PCA, StandardScaler, and SVM components stored in HDF5 format
+- **cats-vs-dogs.keras** (~3-5 MB): PCA, StandardScaler, and SVM components stored in HDF5 format
 
 ## Quick Start
 
@@ -97,7 +97,7 @@ jupyter notebook train_model.ipynb
 
 **Files generated:**
 - `cats-vs-dogs.keras` - Feature extractor
-- `cats-vs-dogs-components.keras` - PCA/Scaler/SVM components
+- `cats-vs-dogs.keras` - PCA/Scaler/SVM components
 
 **Test the model:**
 ```bash
@@ -185,7 +185,7 @@ cats_dogs_svm/
 ├── upload_to_huggingface.py      # HuggingFace upload script
 │
 ├── cats-vs-dogs.keras            # VGG16 feature extractor (~58 MB)
-├── cats-vs-dogs-components.keras # PCA/Scaler/SVM (~3-5 MB)
+├── cats-vs-dogs.keras # PCA/Scaler/SVM (~3-5 MB)
 │
 ├── kaggle_data/                  # Auto-downloaded Kaggle dataset
 │   └── dog-and-cat-classification-dataset/
