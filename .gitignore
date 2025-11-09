@@ -5,3 +5,4 @@ __pycache__/
 test/
 .ruff_cache/
 *.md
+model_cache/
